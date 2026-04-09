@@ -1,0 +1,30 @@
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { Redirect } from "expo-router";
+import { useAuthStore } from "../src/store/auth";
+
+export default function Index() {
+  const { session, profile, isLoading, isApproved } = useAuthStore();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#1B2A4A" }}>
+        <ActivityIndicator size="large" color="#F97316" />
+      </View>
+    );
+  }
+
+  if (!session) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
+
+  if (profile && profile.approval_status === "pending") {
+    return <Redirect href="/pending" />;
+  }
+
+  if (profile && !profile.first_name) {
+    return <Redirect href="/onboarding" />;
+  }
+
+  return <Redirect href="/(tabs)/home" />;
+}

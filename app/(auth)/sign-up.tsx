@@ -1,0 +1,254 @@
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+import { Link, router } from "expo-router";
+import { useAuthStore } from "../../src/store/auth";
+
+export default function SignUp() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const signUp = useAuthStore((s) => s.signUp);
+
+  const handleSignUp = async () => {
+    if (!firstName || !lastName || !email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const { error: err } = await signUp(email.trim(), password, firstName.trim(), lastName.trim());
+    setLoading(false);
+    if (err) {
+      setError(err);
+    } else {
+      setSuccess(true);
+    }
+  };
+
+  if (success) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
+        <Text style={{ fontSize: 24, fontWeight: "700", color: "#1B2A4A", textAlign: "center" }}>
+          Account Created!
+        </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            color: "#6B7280",
+            textAlign: "center",
+            marginTop: 12,
+            lineHeight: 24,
+          }}
+        >
+          Your account is pending admin approval. You'll be able to browse the platform in the
+          meantime.
+        </Text>
+        <TouchableOpacity
+          onPress={() => router.replace("/(auth)/sign-in")}
+          style={{
+            backgroundColor: "#1B2A4A",
+            borderRadius: 8,
+            padding: 16,
+            alignItems: "center",
+            marginTop: 32,
+            width: "100%",
+          }}
+        >
+          <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>Go to Sign In</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={{ alignItems: "center", marginBottom: 32 }}>
+          <Text style={{ fontSize: 32, fontWeight: "800", color: "#1B2A4A" }}>Join Daylo</Text>
+          <Text style={{ fontSize: 14, color: "#6B7280", marginTop: 4 }}>
+            Create your coaching account
+          </Text>
+        </View>
+
+        {error && (
+          <View
+            style={{
+              backgroundColor: "#FEE2E2",
+              padding: 12,
+              borderRadius: 8,
+              marginBottom: 16,
+            }}
+          >
+            <Text style={{ color: "#EF4444", textAlign: "center" }}>{error}</Text>
+          </View>
+        )}
+
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+              First Name
+            </Text>
+            <TextInput
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 14,
+                fontSize: 16,
+                marginBottom: 16,
+              }}
+              placeholder="John"
+              placeholderTextColor="#9CA3AF"
+              value={firstName}
+              onChangeText={setFirstName}
+              autoComplete="given-name"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+              Last Name
+            </Text>
+            <TextInput
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 14,
+                fontSize: 16,
+                marginBottom: 16,
+              }}
+              placeholder="Smith"
+              placeholderTextColor="#9CA3AF"
+              value={lastName}
+              onChangeText={setLastName}
+              autoComplete="family-name"
+            />
+          </View>
+        </View>
+
+        <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+          Email
+        </Text>
+        <TextInput
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderWidth: 1,
+            borderColor: "#D1D5DB",
+            borderRadius: 8,
+            padding: 14,
+            fontSize: 16,
+            marginBottom: 16,
+          }}
+          placeholder="coach@school.edu"
+          placeholderTextColor="#9CA3AF"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          autoComplete="email"
+        />
+
+        <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+          Password
+        </Text>
+        <TextInput
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderWidth: 1,
+            borderColor: "#D1D5DB",
+            borderRadius: 8,
+            padding: 14,
+            fontSize: 16,
+            marginBottom: 16,
+          }}
+          placeholder="••••••••"
+          placeholderTextColor="#9CA3AF"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoComplete="new-password"
+        />
+
+        <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+          Confirm Password
+        </Text>
+        <TextInput
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderWidth: 1,
+            borderColor: "#D1D5DB",
+            borderRadius: 8,
+            padding: 14,
+            fontSize: 16,
+            marginBottom: 24,
+          }}
+          placeholder="••••••••"
+          placeholderTextColor="#9CA3AF"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+          autoComplete="new-password"
+        />
+
+        <TouchableOpacity
+          onPress={handleSignUp}
+          disabled={loading}
+          style={{
+            backgroundColor: "#F97316",
+            borderRadius: 8,
+            padding: 16,
+            alignItems: "center",
+            opacity: loading ? 0.7 : 1,
+          }}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>
+              Create Account
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 24 }}>
+          <Text style={{ color: "#6B7280" }}>Already have an account? </Text>
+          <Link href="/(auth)/sign-in" asChild>
+            <TouchableOpacity>
+              <Text style={{ color: "#F97316", fontWeight: "600" }}>Sign In</Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
