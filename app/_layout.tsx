@@ -1,9 +1,7 @@
 import { useEffect, useRef } from "react";
-import { router } from "expo-router";
+import { Redirect, router, Slot } from "expo-router";
 import * as Notifications from "expo-notifications";
 import { useAuthStore } from "../src/store/auth";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Drawer } from "expo-router/drawer";
 
 import {
   registerForPushNotifications,
@@ -41,31 +39,5 @@ export default function RootLayout() {
     };
   }, []);
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer>
-        <Drawer.Screen
-          name="(tabs)" // Points to the (tabs) folder
-          options={{
-            drawerLabel: "Home",
-            title: "Overview",
-          }}
-        />
-        <Drawer.Screen
-          name="profile"
-          options={{
-            drawerLabel: "Profile",
-            title: "My Profile",
-          }}
-        />
-        <Drawer.Screen
-          name="manage-school"
-          options={{
-            drawerLabel: "Manage School",
-            title: "Manage School",
-          }}
-        />
-      </Drawer>
-    </GestureHandlerRootView>
-  );
+  return <Slot />;
 }

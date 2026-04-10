@@ -8,8 +8,8 @@ import {
   RefreshControl,
 } from "react-native";
 import { router } from "expo-router";
-import { useAuthStore } from "../../src/store/auth";
-import { supabase } from "../../src/lib/supabase";
+import { useAuthStore } from "../../../src/store/auth";
+import { supabase } from "../../../src/lib/supabase";
 
 interface ConversationWithDetails {
   id: string;

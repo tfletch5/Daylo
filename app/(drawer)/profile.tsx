@@ -10,8 +10,8 @@ import {
   Image,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuthStore } from "../src/store/auth";
-import { supabase } from "../src/lib/supabase";
+import { useAuthStore } from "../../src/store/auth";
+import { supabase } from "../../src/lib/supabase";
 import * as ImagePicker from "expo-image-picker";
 
 export default function ProfileScreen() {

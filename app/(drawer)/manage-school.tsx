@@ -10,9 +10,9 @@ import {
   Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuthStore } from "../src/store/auth";
-import { supabase } from "../src/lib/supabase";
-import { Tables } from "../src/types/database";
+import { useAuthStore } from "../../src/store/auth";
+import { supabase } from "../../src/lib/supabase";
+import { Tables } from "../../src/types/database";
 
 type School = Tables<"schools">;
 type CoachSchool = Tables<"coach_schools">;

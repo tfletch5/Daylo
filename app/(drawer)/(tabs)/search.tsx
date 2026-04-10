@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
-import { supabase } from "../../src/lib/supabase";
-import { Tables } from "../../src/types/database";
+import { supabase } from "../../../src/lib/supabase";
+import { Tables } from "../../../src/types/database";
 
 type School = Tables<"schools">;
 

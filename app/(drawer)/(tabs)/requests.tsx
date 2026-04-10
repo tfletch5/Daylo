@@ -8,10 +8,10 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
-import { useAuthStore } from "../../src/store/auth";
-import { supabase } from "../../src/lib/supabase";
-import { Tables } from "../../src/types/database";
-import { exportGameToCalendar } from "../../src/lib/calendar";
+import { useAuthStore } from "../../../src/store/auth";
+import { supabase } from "../../../src/lib/supabase";
+import { Tables } from "../../../src/types/database";
+import { exportGameToCalendar } from "../../../src/lib/calendar";
 
 type Request = Tables<"requests">;
 

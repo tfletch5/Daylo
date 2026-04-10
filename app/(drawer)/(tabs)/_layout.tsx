@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Tabs, useRouter } from "expo-router";
 import { TouchableOpacity } from "react-native";
 import { useNavigation, DrawerActions } from "@react-navigation/native";
-import { useAuthStore } from "../../src/store/auth";
+import { useAuthStore } from "../../../src/store/auth";
 import {
   Home,
   Search,
