@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
-import { Stack, router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { router } from "expo-router";
 import * as Notifications from "expo-notifications";
 import { useAuthStore } from "../src/store/auth";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Drawer } from "expo-router/drawer";
+
 import {
   registerForPushNotifications,
   addNotificationResponseListener,
@@ -40,44 +42,30 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: "#1B2A4A" },
-          headerTintColor: "#FFFFFF",
-          headerTitleStyle: { fontWeight: "bold" },
-          contentStyle: { backgroundColor: "#F9FAFB" },
-        }}
-      >
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Drawer>
+        <Drawer.Screen
+          name="(tabs)" // Points to the (tabs) folder
+          options={{
+            drawerLabel: "Home",
+            title: "Overview",
+          }}
+        />
+        <Drawer.Screen
           name="profile"
           options={{
-            title: "Profile",
-            headerStyle: { backgroundColor: "#1B2A4A" },
-            headerTintColor: "#FFFFFF",
+            drawerLabel: "Profile",
+            title: "My Profile",
           }}
         />
-        <Stack.Screen
+        <Drawer.Screen
           name="manage-school"
           options={{
-            title: "Manage Schools",
-            headerStyle: { backgroundColor: "#1B2A4A" },
-            headerTintColor: "#FFFFFF",
+            drawerLabel: "Manage School",
+            title: "Manage School",
           }}
         />
-        <Stack.Screen
-          name="pending"
-          options={{ title: "Account Pending", headerBackVisible: false }}
-        />
-        <Stack.Screen
-          name="onboarding"
-          options={{ title: "Set Up Profile", headerBackVisible: false }}
-        />
-      </Stack>
-    </>
+      </Drawer>
+    </GestureHandlerRootView>
   );
 }
