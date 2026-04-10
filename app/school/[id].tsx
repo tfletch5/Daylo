@@ -13,6 +13,7 @@ import { useLocalSearchParams, Stack } from "expo-router";
 import { useAuthStore } from "../../src/store/auth";
 import { supabase } from "../../src/lib/supabase";
 import { Tables } from "../../src/types/database";
+import { Phone, Mail, MapPin } from "lucide-react-native";
 
 type School = Tables<"schools">;
 type Availability = Tables<"availability">;
@@ -22,112 +23,126 @@ export default function SchoolDetail() {
   const { profile } = useAuthStore();
   const [school, setSchool] = useState<School | null>(null);
   const [slots, setSlots] = useState<Availability[]>([]);
-  const [coaches, setCoaches] = useState<Array<{ coach_id: string; sport: string; profiles: { first_name: string | null; last_name: string | null } | null }>>([]);
+  const [coaches, setCoaches] = useState<
+    Array<{
+      coach_id: string;
+      sport: string;
+      profiles: { first_name: string | null; last_name: string | null } | null;
+    }>
+  >([]);
   const [loading, setLoading] = useState(true);
-
-  // Request modal
-  const [modalVisible, setModalVisible] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Availability | null>(null);
-  const [reqVenue, setReqVenue] = useState("");
-  const [reqHomeAway, setReqHomeAway] = useState<string>("away");
-  const [submitting, setSubmitting] = useState(false);
-
-  // Coach's own schools for the request
-  const [mySchools, setMySchools] = useState<Array<{ school_id: string; sport: string; schools: { name: string } | null }>>([]);
-  const [selectedMySchool, setSelectedMySchool] = useState("");
-
-  const fetchSchool = useCallback(async () => {
-    if (!id) return;
-
-    const [schoolRes, slotsRes, coachesRes] = await Promise.all([
-      supabase.from("schools").select("*").eq("id", id).single(),
-      supabase
-        .from("availability")
-        .select("*")
-        .eq("school_id", id)
-        .eq("is_booked", false)
-        .gte("date", new Date().toISOString().split("T")[0])
-        .order("date", { ascending: true }),
-      supabase
-        .from("coach_schools")
-        .select("coach_id, sport, profiles(first_name, last_name)")
-        .eq("school_id", id),
-    ]);
-
-    setSchool(schoolRes.data);
-    setSlots(slotsRes.data || []);
-    setCoaches((coachesRes.data as any) || []);
-    setLoading(false);
-  }, [id]);
-
-  const fetchMySchools = useCallback(async () => {
-    if (!profile) return;
-    const { data } = await supabase
-      .from("coach_schools")
-      .select("school_id, sport, schools(name)")
-      .eq("coach_id", profile.id);
-    setMySchools((data as any) || []);
-  }, [profile]);
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    fetchSchool();
-    fetchMySchools();
-  }, [fetchSchool, fetchMySchools]);
+    fetchSchoolDetails();
+  }, [id]);
 
-  const openRequestModal = (slot: Availability) => {
-    setSelectedSlot(slot);
-    setReqVenue(slot.venue || "");
-    setReqHomeAway(slot.home_away_preference === "home" ? "away" : "home");
-    // Auto-select matching school if possible
-    const matching = mySchools.find((s) => s.sport === slot.sport);
-    setSelectedMySchool(matching?.school_id || "");
-    setModalVisible(true);
+  const fetchSchoolDetails = async () => {
+    if (!id) return;
+
+    try {
+      // Fetch school details
+      const { data: schoolData } = await supabase
+        .from("schools")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (schoolData) {
+        setSchool(schoolData);
+
+        // Fetch availability slots
+        const { data: slotsData } = await supabase
+          .from("availability")
+          .select("*")
+          .eq("school_id", id)
+          .eq("is_booked", false)
+          .order("date", { ascending: true });
+
+        setSlots(slotsData || []);
+
+        // Fetch coaches
+        const { data: coachesData } = await supabase
+          .from("coach_schools")
+          .select("coach_id, sport, profiles(first_name, last_name)")
+          .eq("school_id", id);
+
+        setCoaches(coachesData || []);
+      }
+    } catch (error) {
+      console.error("Error fetching school details:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSendRequest = async () => {
-    if (!selectedSlot || !profile || !selectedMySchool) {
-      Alert.alert("Error", "Please select your school.");
+  const handleRequestGame = (slot: Availability) => {
+    if (!profile) {
+      Alert.alert("Error", "Please sign in to request a game");
       return;
     }
+    setSelectedSlot(slot);
+    setShowRequestModal(true);
+  };
 
-    setSubmitting(true);
+  const sendRequest = async () => {
+    if (!profile || !selectedSlot || !message.trim()) return;
 
-    const { error } = await supabase.from("requests").insert({
-      requester_id: profile.id,
-      requester_school_id: selectedMySchool,
-      recipient_id: selectedSlot.coach_id,
-      recipient_school_id: selectedSlot.school_id,
-      availability_id: selectedSlot.id,
-      sport: selectedSlot.sport,
-      date: selectedSlot.date,
-      time_start: selectedSlot.time_start,
-      time_end: selectedSlot.time_end,
-      home_away: reqHomeAway,
-      venue: reqVenue || null,
-    });
+    setSending(true);
+    try {
+      const { error } = await supabase.from("requests").insert({
+        requester_id: profile.id,
+        requester_school_id: "", // Will be set by trigger
+        recipient_id: selectedSlot.coach_id,
+        recipient_school_id: id,
+        availability_id: selectedSlot.id,
+        date: selectedSlot.date,
+        time_start: selectedSlot.time_start,
+        time_end: selectedSlot.time_end,
+        sport: selectedSlot.sport,
+        home_away: "away",
+        status: "pending",
+      });
 
-    setSubmitting(false);
-    if (error) {
-      Alert.alert("Error", error.message);
-    } else {
-      Alert.alert("Request Sent", "Your game request has been sent to the coach.");
-      setModalVisible(false);
-      fetchSchool();
+      if (error) {
+        Alert.alert("Error", error.message);
+      } else {
+        Alert.alert("Success", "Game request sent!");
+        setShowRequestModal(false);
+        setMessage("");
+        setSelectedSlot(null);
+        // Refresh slots
+        fetchSchoolDetails();
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to send request");
+    } finally {
+      setSending(false);
     }
   };
 
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#1B2A4A" />
+        <ActivityIndicator size="large" color="#F97316" />
       </View>
     );
   }
 
   if (!school) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ color: "#9CA3AF" }}>School not found</Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 20,
+        }}
+      >
+        <Text style={{ fontSize: 18, color: "#6B7280" }}>School not found</Text>
       </View>
     );
   }
@@ -135,217 +150,394 @@ export default function SchoolDetail() {
   return (
     <>
       <Stack.Screen options={{ title: school.name }} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
-        {/* School Header */}
-        <View style={{ backgroundColor: "#FFFFFF", borderRadius: 12, padding: 20, marginBottom: 16, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 }}>
-          <Text style={{ fontSize: 24, fontWeight: "800", color: "#1B2A4A" }}>{school.name}</Text>
-          {school.mascot && (
-            <Text style={{ fontSize: 16, color: "#F97316", fontWeight: "600", marginTop: 4 }}>
-              {school.mascot}
+      <ScrollView style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
+        <View style={{ padding: 16 }}>
+          {/* School Info */}
+          <View
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 12,
+              padding: 20,
+              marginBottom: 16,
+              shadowColor: "#000",
+              shadowOpacity: 0.05,
+              shadowRadius: 10,
+              elevation: 2,
+            }}
+          >
+            <Text style={{ fontSize: 24, fontWeight: "800", color: "#1B2A4A" }}>
+              {school.name}
             </Text>
-          )}
-          {(school.city || school.state) && (
-            <Text style={{ fontSize: 14, color: "#6B7280", marginTop: 8 }}>
-              {[school.address, school.city, school.state, school.zip_code].filter(Boolean).join(", ")}
-            </Text>
-          )}
-          <View style={{ flexDirection: "row", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-            {school.division && (
-              <View style={{ backgroundColor: "#EFF6FF", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 }}>
-                <Text style={{ fontSize: 12, color: "#3B82F6", fontWeight: "600" }}>Division: {school.division}</Text>
-              </View>
+            {school.mascot && (
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "#F97316",
+                  fontWeight: "600",
+                  marginTop: 4,
+                }}
+              >
+                {school.mascot}
+              </Text>
             )}
-            {school.conference && (
-              <View style={{ backgroundColor: "#F0FDF4", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 }}>
-                <Text style={{ fontSize: 12, color: "#10B981", fontWeight: "600" }}>Conference: {school.conference}</Text>
+            {(school.city || school.state) && (
+              <Text style={{ fontSize: 14, color: "#6B7280", marginTop: 8 }}>
+                {[school.address, school.city, school.state, school.zip_code]
+                  .filter(Boolean)
+                  .join(", ")}
+              </Text>
+            )}
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 8,
+                marginTop: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              {school.division && (
+                <View
+                  style={{
+                    backgroundColor: "#EFF6FF",
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#1E40AF",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {school.division}
+                  </Text>
+                </View>
+              )}
+              {school.conference && (
+                <View
+                  style={{
+                    backgroundColor: "#F0FDF4",
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#166534",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Conference: {school.conference}
+                  </Text>
+                </View>
+              )}
+            </View>
+            {(school.contact_phone || school.contact_email) && (
+              <View
+                style={{
+                  marginTop: 12,
+                  paddingTop: 12,
+                  borderTopWidth: 1,
+                  borderTopColor: "#F3F4F6",
+                }}
+              >
+                {school.contact_phone && (
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Text style={{ color: "#6B7280", marginRight: 8 }}>
+                      <Phone size={16} />
+                    </Text>
+                    <Text style={{ fontSize: 13, color: "#6B7280" }}>
+                      {school.contact_phone}
+                    </Text>
+                  </View>
+                )}
+                {school.contact_email && (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 4,
+                    }}
+                  >
+                    <Text style={{ color: "#6B7280", marginRight: 8 }}>
+                      <Mail size={16} />
+                    </Text>
+                    <Text style={{ fontSize: 13, color: "#6B7280" }}>
+                      {school.contact_email}
+                    </Text>
+                  </View>
+                )}
               </View>
             )}
           </View>
-          {(school.contact_phone || school.contact_email) && (
-            <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#F3F4F6" }}>
-              {school.contact_phone && (
-                <Text style={{ fontSize: 13, color: "#6B7280" }}>📞 {school.contact_phone}</Text>
-              )}
-              {school.contact_email && (
-                <Text style={{ fontSize: 13, color: "#6B7280", marginTop: 4 }}>✉️ {school.contact_email}</Text>
-              )}
-            </View>
-          )}
-        </View>
 
-        {/* Coaches */}
-        <View style={{ backgroundColor: "#FFFFFF", borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 }}>
-          <Text style={{ fontSize: 18, fontWeight: "700", color: "#1B2A4A", marginBottom: 12 }}>Coaches</Text>
-          {coaches.length === 0 ? (
-            <Text style={{ color: "#9CA3AF", fontSize: 14 }}>No coaches listed</Text>
-          ) : (
-            coaches.map((c, i) => (
-              <View key={i} style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: i < coaches.length - 1 ? 1 : 0, borderBottomColor: "#F3F4F6" }}>
-                <Text style={{ fontSize: 14, color: "#374151", fontWeight: "500" }}>
-                  {c.profiles?.first_name || ""} {c.profiles?.last_name || ""}
-                </Text>
-                <View style={{ backgroundColor: "#EFF6FF", paddingHorizontal: 10, paddingVertical: 2, borderRadius: 10 }}>
-                  <Text style={{ fontSize: 11, color: "#3B82F6", fontWeight: "600" }}>
-                    {c.sport.charAt(0).toUpperCase() + c.sport.slice(1)}
+          {/* Coaches */}
+          <View
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 16,
+              shadowColor: "#000",
+              shadowOpacity: 0.05,
+              shadowRadius: 10,
+              elevation: 2,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "700",
+                color: "#1B2A4A",
+                marginBottom: 12,
+              }}
+            >
+              Coaches
+            </Text>
+            {coaches.length === 0 ? (
+              <Text style={{ color: "#9CA3AF", fontSize: 14 }}>
+                No coaches listed
+              </Text>
+            ) : (
+              coaches.map((coach) => (
+                <View
+                  key={coach.coach_id}
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingVertical: 8,
+                  }}
+                >
+                  <Text style={{ fontSize: 14, color: "#374151" }}>
+                    {coach.profiles?.first_name} {coach.profiles?.last_name}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: "#6B7280" }}>
+                    {coach.sport}
                   </Text>
                 </View>
-              </View>
-            ))
-          )}
-        </View>
+              ))
+            )}
+          </View>
 
-        {/* Available Slots */}
-        <View style={{ backgroundColor: "#FFFFFF", borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 }}>
-          <Text style={{ fontSize: 18, fontWeight: "700", color: "#1B2A4A", marginBottom: 12 }}>
-            Available Game Slots
-          </Text>
-          {slots.length === 0 ? (
-            <Text style={{ color: "#9CA3AF", fontSize: 14 }}>No open slots at this time</Text>
-          ) : (
-            slots.map((slot) => {
-              const isOwn = slot.coach_id === profile?.id;
-              return (
+          {/* Available Slots */}
+          <View
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 16,
+              shadowColor: "#000",
+              shadowOpacity: 0.05,
+              shadowRadius: 10,
+              elevation: 2,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "700",
+                color: "#1B2A4A",
+                marginBottom: 12,
+              }}
+            >
+              Available Time Slots
+            </Text>
+            {slots.length === 0 ? (
+              <Text style={{ color: "#9CA3AF", fontSize: 14 }}>
+                No available time slots
+              </Text>
+            ) : (
+              slots.map((slot) => (
                 <View
                   key={slot.id}
                   style={{
-                    borderBottomWidth: 1,
-                    borderBottomColor: "#F3F4F6",
-                    paddingVertical: 12,
+                    borderWidth: 1,
+                    borderColor: "#E5E7EB",
+                    borderRadius: 8,
+                    padding: 12,
+                    marginBottom: 8,
                   }}
                 >
-                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                    <View>
-                      <Text style={{ fontSize: 15, fontWeight: "600", color: "#374151" }}>
-                        {slot.date}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: "600",
+                          color: "#1B2A4A",
+                        }}
+                      >
+                        {new Date(
+                          slot.date + " " + slot.time_start,
+                        ).toLocaleDateString()}
                       </Text>
-                      <Text style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}>
-                        {slot.time_start} – {slot.time_end}
+                      <Text
+                        style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}
+                      >
+                        {slot.time_start}
                       </Text>
+                      <Text
+                        style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}
+                      >
+                        {slot.sport}
+                      </Text>
+                      {slot.venue && (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginTop: 4,
+                          }}
+                        >
+                          <Text style={{ color: "#9CA3AF", marginRight: 4 }}>
+                            <MapPin size={12} />
+                          </Text>
+                          <Text style={{ fontSize: 12, color: "#9CA3AF" }}>
+                            {slot.venue}
+                          </Text>
+                        </View>
+                      )}
                     </View>
-                    <View style={{ flexDirection: "row", gap: 6 }}>
-                      <View style={{ backgroundColor: "#FFF7ED", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 }}>
-                        <Text style={{ fontSize: 11, color: "#F97316", fontWeight: "600" }}>
-                          {slot.home_away_preference.charAt(0).toUpperCase() + slot.home_away_preference.slice(1)}
+                    {!profile || profile.id === slot.coach_id ? null : (
+                      <TouchableOpacity
+                        onPress={() => handleRequestGame(slot)}
+                        style={{
+                          backgroundColor: "#F97316",
+                          paddingHorizontal: 12,
+                          paddingVertical: 6,
+                          borderRadius: 6,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "#FFFFFF",
+                            fontSize: 12,
+                            fontWeight: "600",
+                          }}
+                        >
+                          Request
                         </Text>
-                      </View>
-                      <View style={{ backgroundColor: "#EFF6FF", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 }}>
-                        <Text style={{ fontSize: 11, color: "#3B82F6", fontWeight: "600" }}>
-                          {slot.sport.charAt(0).toUpperCase() + slot.sport.slice(1)}
-                        </Text>
-                      </View>
-                    </View>
+                      </TouchableOpacity>
+                    )}
                   </View>
-                  {slot.venue && (
-                    <Text style={{ fontSize: 12, color: "#9CA3AF", marginTop: 4 }}>📍 {slot.venue}</Text>
-                  )}
-                  {!isOwn && (
-                    <TouchableOpacity
-                      onPress={() => openRequestModal(slot)}
-                      style={{
-                        backgroundColor: "#F97316",
-                        borderRadius: 8,
-                        padding: 10,
-                        alignItems: "center",
-                        marginTop: 10,
-                      }}
-                    >
-                      <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 14 }}>
-                        Send Game Request
-                      </Text>
-                    </TouchableOpacity>
-                  )}
                 </View>
-              );
-            })
-          )}
+              ))
+            )}
+          </View>
         </View>
       </ScrollView>
 
-      {/* Send Request Modal */}
-      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet">
-        <ScrollView contentContainerStyle={{ padding: 24 }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-            <Text style={{ fontSize: 20, fontWeight: "700", color: "#1B2A4A" }}>Send Game Request</Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Text style={{ color: "#6B7280", fontSize: 16 }}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-
-          {selectedSlot && (
-            <View style={{ backgroundColor: "#F9FAFB", borderRadius: 8, padding: 12, marginBottom: 20 }}>
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151" }}>
-                {selectedSlot.sport.charAt(0).toUpperCase() + selectedSlot.sport.slice(1)} — {selectedSlot.date}
+      {/* Request Modal */}
+      <Modal
+        visible={showRequestModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowRequestModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 12,
+              padding: 20,
+              width: "100%",
+              maxWidth: 400,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "700",
+                color: "#1B2A4A",
+                marginBottom: 12,
+              }}
+            >
+              Request Game
+            </Text>
+            {selectedSlot && (
+              <Text
+                style={{ fontSize: 14, color: "#6B7280", marginBottom: 16 }}
+              >
+                {new Date(
+                  selectedSlot.date + " " + selectedSlot.time_start,
+                ).toLocaleDateString()}{" "}
+                at {selectedSlot.time_start}
               </Text>
-              <Text style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}>
-                {selectedSlot.time_start} – {selectedSlot.time_end}
-              </Text>
-            </View>
-          )}
-
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Your School *</Text>
-          <View style={{ flexDirection: "row", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-            {mySchools
-              .filter((s) => selectedSlot && s.sport === selectedSlot.sport)
-              .map((s) => (
-                <TouchableOpacity
-                  key={s.school_id}
-                  onPress={() => setSelectedMySchool(s.school_id)}
-                  style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 10,
-                    borderRadius: 8,
-                    backgroundColor: selectedMySchool === s.school_id ? "#1B2A4A" : "#F3F4F6",
-                  }}
-                >
-                  <Text style={{ color: selectedMySchool === s.school_id ? "#FFFFFF" : "#374151", fontWeight: "600" }}>
-                    {s.schools?.name || "Unknown"}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-          </View>
-
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Home/Away</Text>
-          <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
-            {(["home", "away", "neutral"] as const).map((ha) => (
+            )}
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 14,
+                marginBottom: 16,
+                minHeight: 80,
+                textAlignVertical: "top",
+              }}
+              placeholder="Add a message (optional)"
+              placeholderTextColor="#9CA3AF"
+              value={message}
+              onChangeText={setMessage}
+              multiline
+            />
+            <View style={{ flexDirection: "row", gap: 12 }}>
               <TouchableOpacity
-                key={ha}
-                onPress={() => setReqHomeAway(ha)}
+                onPress={() => setShowRequestModal(false)}
                 style={{
                   flex: 1,
-                  paddingVertical: 10,
+                  borderWidth: 1,
+                  borderColor: "#D1D5DB",
                   borderRadius: 8,
-                  backgroundColor: reqHomeAway === ha ? "#1B2A4A" : "#F3F4F6",
+                  padding: 12,
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: reqHomeAway === ha ? "#FFFFFF" : "#374151", fontWeight: "600" }}>
-                  {ha.charAt(0).toUpperCase() + ha.slice(1)}
+                <Text style={{ color: "#6B7280", fontWeight: "600" }}>
+                  Cancel
                 </Text>
               </TouchableOpacity>
-            ))}
+              <TouchableOpacity
+                onPress={sendRequest}
+                disabled={sending}
+                style={{
+                  flex: 1,
+                  backgroundColor: sending ? "#9CA3AF" : "#F97316",
+                  borderRadius: 8,
+                  padding: 12,
+                  alignItems: "center",
+                }}
+              >
+                {sending ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                    Send Request
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
-
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Venue (optional)</Text>
-          <TextInput
-            style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 24 }}
-            value={reqVenue}
-            onChangeText={setReqVenue}
-            placeholder="Proposed venue"
-            placeholderTextColor="#9CA3AF"
-          />
-
-          <TouchableOpacity
-            onPress={handleSendRequest}
-            disabled={submitting}
-            style={{ backgroundColor: "#F97316", borderRadius: 8, padding: 16, alignItems: "center", opacity: submitting ? 0.7 : 1 }}
-          >
-            {submitting ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>Send Request</Text>
-            )}
-          </TouchableOpacity>
-        </ScrollView>
+        </View>
       </Modal>
     </>
   );

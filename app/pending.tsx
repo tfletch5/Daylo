@@ -1,11 +1,20 @@
 import { View, Text, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 import { useAuthStore } from "../src/store/auth";
 
 export default function Pending() {
-  const { signOut, fetchProfile } = useAuthStore();
+  const router = useRouter();
+  const { signOut, fetchProfile, profile } = useAuthStore();
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 24,
+      }}
+    >
       <View
         style={{
           width: 80,
@@ -20,7 +29,14 @@ export default function Pending() {
         <Text style={{ fontSize: 36 }}>⏳</Text>
       </View>
 
-      <Text style={{ fontSize: 24, fontWeight: "700", color: "#1B2A4A", textAlign: "center" }}>
+      <Text
+        style={{
+          fontSize: 24,
+          fontWeight: "700",
+          color: "#1B2A4A",
+          textAlign: "center",
+        }}
+      >
         Account Pending
       </Text>
       <Text
@@ -33,12 +49,23 @@ export default function Pending() {
           paddingHorizontal: 16,
         }}
       >
-        Your account is awaiting approval from a Daylo administrator. You'll receive a notification
-        once your account has been approved.
+        Your account is awaiting approval from a Daylo administrator. You'll
+        receive a notification once your account has been approved.
       </Text>
 
       <TouchableOpacity
-        onPress={fetchProfile}
+        onPress={async () => {
+          await fetchProfile();
+          // After fetching, check if approved and navigate accordingly
+          const state = useAuthStore.getState();
+          if (state.profile?.approval_status === "approved") {
+            if (!state.profile.first_name) {
+              router.replace("/onboarding");
+            } else {
+              router.replace("/(tabs)/home");
+            }
+          }
+        }}
         style={{
           backgroundColor: "#1B2A4A",
           borderRadius: 8,
@@ -48,7 +75,9 @@ export default function Pending() {
           width: "100%",
         }}
       >
-        <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>Check Status</Text>
+        <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>
+          Check Status
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -63,7 +92,9 @@ export default function Pending() {
           width: "100%",
         }}
       >
-        <Text style={{ color: "#6B7280", fontSize: 16, fontWeight: "600" }}>Sign Out</Text>
+        <Text style={{ color: "#6B7280", fontSize: 16, fontWeight: "600" }}>
+          Sign Out
+        </Text>
       </TouchableOpacity>
     </View>
   );

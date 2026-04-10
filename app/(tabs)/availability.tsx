@@ -37,7 +37,14 @@ export default function AvailabilityScreen() {
   const [formVenue, setFormVenue] = useState("");
   const [formDistance, setFormDistance] = useState("");
   const [formSchoolId, setFormSchoolId] = useState("");
-  const [coachSchools, setCoachSchools] = useState<Array<{ id: string; school_id: string; sport: string; schools: { name: string } | null }>>([]);
+  const [coachSchools, setCoachSchools] = useState<
+    Array<{
+      id: string;
+      school_id: string;
+      sport: string;
+      schools: { name: string } | null;
+    }>
+  >([]);
   const [submitting, setSubmitting] = useState(false);
 
   const fetchSlots = useCallback(async () => {
@@ -74,22 +81,35 @@ export default function AvailabilityScreen() {
   }, [fetchSlots]);
 
   const handleDelete = (id: string) => {
-    Alert.alert("Delete Slot", "Are you sure you want to delete this availability slot?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          await supabase.from("availability").delete().eq("id", id);
-          fetchSlots();
+    Alert.alert(
+      "Delete Slot",
+      "Are you sure you want to delete this availability slot?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await supabase.from("availability").delete().eq("id", id);
+            fetchSlots();
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const handleCreate = async () => {
-    if (!profile || !formSchoolId || !formDate || !formTimeStart || !formTimeEnd) {
-      Alert.alert("Error", "Please fill in all required fields (school, date, start time, end time).");
+    if (
+      !profile ||
+      !formSchoolId ||
+      !formDate ||
+      !formTimeStart ||
+      !formTimeEnd
+    ) {
+      Alert.alert(
+        "Error",
+        "Please fill in all required fields (school, date, start time, end time).",
+      );
       return;
     }
     setSubmitting(true);
@@ -136,7 +156,13 @@ export default function AvailabilityScreen() {
         data={slots}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1B2A4A" />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#1B2A4A"
+          />
+        }
         ListHeaderComponent={
           <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 12 }}>
             {slots.length} upcoming slot{slots.length !== 1 ? "s" : ""}
@@ -165,9 +191,13 @@ export default function AvailabilityScreen() {
               elevation: 2,
             }}
           >
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 16, fontWeight: "700", color: "#1B2A4A" }}>
+                <Text
+                  style={{ fontSize: 16, fontWeight: "700", color: "#1B2A4A" }}
+                >
                   {item.date}
                 </Text>
                 <Text style={{ fontSize: 13, color: "#6B7280", marginTop: 4 }}>
@@ -195,25 +225,66 @@ export default function AvailabilityScreen() {
               </View>
             </View>
             <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
-              <View style={{ backgroundColor: "#EFF6FF", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
-                <Text style={{ fontSize: 11, color: "#3B82F6", fontWeight: "600" }}>
+              <View
+                style={{
+                  backgroundColor: "#EFF6FF",
+                  paddingHorizontal: 10,
+                  paddingVertical: 4,
+                  borderRadius: 12,
+                }}
+              >
+                <Text
+                  style={{ fontSize: 11, color: "#3B82F6", fontWeight: "600" }}
+                >
                   {item.sport.charAt(0).toUpperCase() + item.sport.slice(1)}
                 </Text>
               </View>
-              <View style={{ backgroundColor: "#FFF7ED", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
-                <Text style={{ fontSize: 11, color: "#F97316", fontWeight: "600" }}>
-                  {item.home_away_preference.charAt(0).toUpperCase() + item.home_away_preference.slice(1)}
+              <View
+                style={{
+                  backgroundColor: "#FFF7ED",
+                  paddingHorizontal: 10,
+                  paddingVertical: 4,
+                  borderRadius: 12,
+                }}
+              >
+                <Text
+                  style={{ fontSize: 11, color: "#F97316", fontWeight: "600" }}
+                >
+                  {item.home_away_preference.charAt(0).toUpperCase() +
+                    item.home_away_preference.slice(1)}
                 </Text>
               </View>
               {item.venue && (
-                <View style={{ backgroundColor: "#F3F4F6", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
-                  <Text style={{ fontSize: 11, color: "#6B7280", fontWeight: "600" }}>{item.venue}</Text>
+                <View
+                  style={{
+                    backgroundColor: "#F3F4F6",
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderRadius: 12,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      color: "#6B7280",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {item.venue}
+                  </Text>
                 </View>
               )}
             </View>
             {!item.is_booked && (
-              <TouchableOpacity onPress={() => handleDelete(item.id)} style={{ marginTop: 12 }}>
-                <Text style={{ color: "#EF4444", fontWeight: "600", fontSize: 13 }}>Delete Slot</Text>
+              <TouchableOpacity
+                onPress={() => handleDelete(item.id)}
+                style={{ marginTop: 12 }}
+              >
+                <Text
+                  style={{ color: "#EF4444", fontWeight: "600", fontSize: 13 }}
+                >
+                  Delete Slot
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -239,13 +310,26 @@ export default function AvailabilityScreen() {
           elevation: 4,
         }}
       >
-        <Text style={{ fontSize: 28, color: "#FFFFFF", lineHeight: 30 }}>+</Text>
+        <Text style={{ fontSize: 28, color: "#FFFFFF", lineHeight: 30 }}>
+          +
+        </Text>
       </TouchableOpacity>
 
       {/* Create Modal */}
-      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet">
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24 }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 24,
+            }}
+          >
             <Text style={{ fontSize: 20, fontWeight: "700", color: "#1B2A4A" }}>
               New Availability Slot
             </Text>
@@ -254,7 +338,16 @@ export default function AvailabilityScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Sport *</Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            Sport *
+          </Text>
           <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
             {SPORTS.map((s) => (
               <TouchableOpacity
@@ -269,15 +362,36 @@ export default function AvailabilityScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: formSport === s ? "#FFFFFF" : "#374151", fontWeight: "600" }}>
+                <Text
+                  style={{
+                    color: formSport === s ? "#FFFFFF" : "#374151",
+                    fontWeight: "600",
+                  }}
+                >
                   {s.charAt(0).toUpperCase() + s.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>School *</Text>
-          <View style={{ flexDirection: "row", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            School *
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 8,
+              marginBottom: 16,
+              flexWrap: "wrap",
+            }}
+          >
             {coachSchools
               .filter((cs) => cs.sport === formSport)
               .map((cs) => (
@@ -288,22 +402,49 @@ export default function AvailabilityScreen() {
                     paddingHorizontal: 16,
                     paddingVertical: 10,
                     borderRadius: 8,
-                    backgroundColor: formSchoolId === cs.school_id ? "#1B2A4A" : "#F3F4F6",
+                    backgroundColor:
+                      formSchoolId === cs.school_id ? "#1B2A4A" : "#F3F4F6",
                   }}
                 >
-                  <Text style={{ color: formSchoolId === cs.school_id ? "#FFFFFF" : "#374151", fontWeight: "600" }}>
+                  <Text
+                    style={{
+                      color:
+                        formSchoolId === cs.school_id ? "#FFFFFF" : "#374151",
+                      fontWeight: "600",
+                    }}
+                  >
                     {cs.schools?.name || "Unknown"}
                   </Text>
                 </TouchableOpacity>
               ))}
-            {coachSchools.filter((cs) => cs.sport === formSport).length === 0 && (
-              <Text style={{ color: "#9CA3AF", fontSize: 14 }}>No schools linked for this sport. Add one in your profile.</Text>
+            {coachSchools.filter((cs) => cs.sport === formSport).length ===
+              0 && (
+              <Text style={{ color: "#9CA3AF", fontSize: 14 }}>
+                No schools linked for this sport. Add one in your profile.
+              </Text>
             )}
           </View>
 
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Date * (YYYY-MM-DD)</Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            Date * (YYYY-MM-DD)
+          </Text>
           <TextInput
-            style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderWidth: 1,
+              borderColor: "#D1D5DB",
+              borderRadius: 8,
+              padding: 14,
+              fontSize: 16,
+              marginBottom: 16,
+            }}
             placeholder="2025-09-12"
             placeholderTextColor="#9CA3AF"
             value={formDate}
@@ -312,9 +453,26 @@ export default function AvailabilityScreen() {
 
           <View style={{ flexDirection: "row", gap: 12 }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Start Time * (HH:MM)</Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: "#374151",
+                  marginBottom: 6,
+                }}
+              >
+                Start Time * (HH:MM)
+              </Text>
               <TextInput
-                style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderWidth: 1,
+                  borderColor: "#D1D5DB",
+                  borderRadius: 8,
+                  padding: 14,
+                  fontSize: 16,
+                  marginBottom: 16,
+                }}
                 placeholder="19:00"
                 placeholderTextColor="#9CA3AF"
                 value={formTimeStart}
@@ -322,9 +480,26 @@ export default function AvailabilityScreen() {
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>End Time * (HH:MM)</Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: "#374151",
+                  marginBottom: 6,
+                }}
+              >
+                End Time * (HH:MM)
+              </Text>
               <TextInput
-                style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderWidth: 1,
+                  borderColor: "#D1D5DB",
+                  borderRadius: 8,
+                  padding: 14,
+                  fontSize: 16,
+                  marginBottom: 16,
+                }}
                 placeholder="21:00"
                 placeholderTextColor="#9CA3AF"
                 value={formTimeEnd}
@@ -333,7 +508,16 @@ export default function AvailabilityScreen() {
             </View>
           </View>
 
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Home/Away Preference</Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            Home/Away Preference
+          </Text>
           <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
             {PREFERENCES.map((p) => (
               <TouchableOpacity
@@ -348,25 +532,64 @@ export default function AvailabilityScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: formPreference === p ? "#FFFFFF" : "#374151", fontWeight: "600" }}>
+                <Text
+                  style={{
+                    color: formPreference === p ? "#FFFFFF" : "#374151",
+                    fontWeight: "600",
+                  }}
+                >
                   {p.charAt(0).toUpperCase() + p.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Venue (optional)</Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            Venue (optional)
+          </Text>
           <TextInput
-            style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderWidth: 1,
+              borderColor: "#D1D5DB",
+              borderRadius: 8,
+              padding: 14,
+              fontSize: 16,
+              marginBottom: 16,
+            }}
             placeholder="Memorial Stadium"
             placeholderTextColor="#9CA3AF"
             value={formVenue}
             onChangeText={setFormVenue}
           />
 
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Max Travel Distance (miles, optional)</Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            Max Travel Distance (miles, optional)
+          </Text>
           <TextInput
-            style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 24 }}
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderWidth: 1,
+              borderColor: "#D1D5DB",
+              borderRadius: 8,
+              padding: 14,
+              fontSize: 16,
+              marginBottom: 24,
+            }}
             placeholder="50"
             placeholderTextColor="#9CA3AF"
             value={formDistance}
@@ -389,7 +612,11 @@ export default function AvailabilityScreen() {
             {submitting ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>Create Slot</Text>
+              <Text
+                style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}
+              >
+                Create Slot
+              </Text>
             )}
           </TouchableOpacity>
         </ScrollView>

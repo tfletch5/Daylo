@@ -31,7 +31,9 @@ interface ConversationWithDetails {
 
 export default function MessagesScreen() {
   const { profile } = useAuthStore();
-  const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
+  const [conversations, setConversations] = useState<ConversationWithDetails[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -54,7 +56,9 @@ export default function MessagesScreen() {
 
     for (const convo of convos) {
       const otherId =
-        convo.participant_a === profile.id ? convo.participant_b : convo.participant_a;
+        convo.participant_a === profile.id
+          ? convo.participant_b
+          : convo.participant_a;
 
       const [profileRes, msgRes, unreadRes] = await Promise.all([
         supabase
@@ -134,14 +138,25 @@ export default function MessagesScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 32 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1B2A4A" />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#1B2A4A"
+          />
         }
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 48, padding: 24 }}>
             <Text style={{ fontSize: 18, fontWeight: "600", color: "#374151" }}>
               No conversations yet
             </Text>
-            <Text style={{ fontSize: 14, color: "#9CA3AF", marginTop: 4, textAlign: "center" }}>
+            <Text
+              style={{
+                fontSize: 14,
+                color: "#9CA3AF",
+                marginTop: 4,
+                textAlign: "center",
+              }}
+            >
               Conversations are created when you send or receive a game request
             </Text>
           </View>
@@ -170,13 +185,20 @@ export default function MessagesScreen() {
                 marginRight: 12,
               }}
             >
-              <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 18 }}>
+              <Text
+                style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 18 }}
+              >
                 {(item.other_user?.first_name?.[0] || "?").toUpperCase()}
               </Text>
             </View>
 
             <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 16,
@@ -185,7 +207,8 @@ export default function MessagesScreen() {
                   }}
                 >
                   {item.other_user
-                    ? `${item.other_user.first_name || ""} ${item.other_user.last_name || ""}`.trim() || "Coach"
+                    ? `${item.other_user.first_name || ""} ${item.other_user.last_name || ""}`.trim() ||
+                      "Coach"
                     : "Coach"}
                 </Text>
                 {item.last_message && (
@@ -194,7 +217,13 @@ export default function MessagesScreen() {
                   </Text>
                 )}
               </View>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 4,
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 13,
@@ -219,7 +248,13 @@ export default function MessagesScreen() {
                       marginLeft: 8,
                     }}
                   >
-                    <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "700" }}>
+                    <Text
+                      style={{
+                        color: "#FFFFFF",
+                        fontSize: 11,
+                        fontWeight: "700",
+                      }}
+                    >
                       {item.unread_count}
                     </Text>
                   </View>

@@ -20,7 +20,6 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const signUp = useAuthStore((s) => s.signUp);
 
   const handleSignUp = async () => {
@@ -38,49 +37,23 @@ export default function SignUp() {
     }
     setLoading(true);
     setError(null);
-    const { error: err } = await signUp(email.trim(), password, firstName.trim(), lastName.trim());
+    const result = await signUp(
+      email.trim(),
+      password,
+      firstName.trim(),
+      lastName.trim(),
+    );
     setLoading(false);
-    if (err) {
-      setError(err);
-    } else {
-      setSuccess(true);
+    if (result.error) {
+      setError(result.error);
+    } else if (result.needsVerification) {
+      // Redirect to verification screen
+      router.push({
+        pathname: "/(auth)/verify-email",
+        params: { email: email.trim() },
+      });
     }
   };
-
-  if (success) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
-        <Text style={{ fontSize: 24, fontWeight: "700", color: "#1B2A4A", textAlign: "center" }}>
-          Account Created!
-        </Text>
-        <Text
-          style={{
-            fontSize: 16,
-            color: "#6B7280",
-            textAlign: "center",
-            marginTop: 12,
-            lineHeight: 24,
-          }}
-        >
-          Your account is pending admin approval. You'll be able to browse the platform in the
-          meantime.
-        </Text>
-        <TouchableOpacity
-          onPress={() => router.replace("/(auth)/sign-in")}
-          style={{
-            backgroundColor: "#1B2A4A",
-            borderRadius: 8,
-            padding: 16,
-            alignItems: "center",
-            marginTop: 32,
-            width: "100%",
-          }}
-        >
-          <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>Go to Sign In</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <KeyboardAvoidingView
@@ -88,11 +61,17 @@ export default function SignUp() {
       style={{ flex: 1 }}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          padding: 24,
+        }}
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ alignItems: "center", marginBottom: 32 }}>
-          <Text style={{ fontSize: 32, fontWeight: "800", color: "#1B2A4A" }}>Join Daylo</Text>
+          <Text style={{ fontSize: 32, fontWeight: "800", color: "#1B2A4A" }}>
+            Join Daylo
+          </Text>
           <Text style={{ fontSize: 14, color: "#6B7280", marginTop: 4 }}>
             Create your coaching account
           </Text>
@@ -107,13 +86,22 @@ export default function SignUp() {
               marginBottom: 16,
             }}
           >
-            <Text style={{ color: "#EF4444", textAlign: "center" }}>{error}</Text>
+            <Text style={{ color: "#EF4444", textAlign: "center" }}>
+              {error}
+            </Text>
           </View>
         )}
 
         <View style={{ flexDirection: "row", gap: 12 }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
               First Name
             </Text>
             <TextInput
@@ -134,7 +122,14 @@ export default function SignUp() {
             />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
               Last Name
             </Text>
             <TextInput
@@ -156,7 +151,14 @@ export default function SignUp() {
           </View>
         </View>
 
-        <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            color: "#374151",
+            marginBottom: 6,
+          }}
+        >
           Email
         </Text>
         <TextInput
@@ -178,7 +180,14 @@ export default function SignUp() {
           autoComplete="email"
         />
 
-        <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            color: "#374151",
+            marginBottom: 6,
+          }}
+        >
           Password
         </Text>
         <TextInput
@@ -199,7 +208,14 @@ export default function SignUp() {
           autoComplete="new-password"
         />
 
-        <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            color: "#374151",
+            marginBottom: 6,
+          }}
+        >
           Confirm Password
         </Text>
         <TextInput
@@ -240,11 +256,19 @@ export default function SignUp() {
           )}
         </TouchableOpacity>
 
-        <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 24 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 24,
+          }}
+        >
           <Text style={{ color: "#6B7280" }}>Already have an account? </Text>
           <Link href="/(auth)/sign-in" asChild>
             <TouchableOpacity>
-              <Text style={{ color: "#F97316", fontWeight: "600" }}>Sign In</Text>
+              <Text style={{ color: "#F97316", fontWeight: "600" }}>
+                Sign In
+              </Text>
             </TouchableOpacity>
           </Link>
         </View>

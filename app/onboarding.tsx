@@ -13,6 +13,7 @@ import {
 import { router } from "expo-router";
 import { useAuthStore } from "../src/store/auth";
 import { supabase } from "../src/lib/supabase";
+import { Circle } from "lucide-react-native";
 
 const SPORTS = ["football", "soccer"] as const;
 
@@ -48,7 +49,11 @@ export default function Onboarding() {
     setLoading(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ first_name: firstName.trim(), last_name: lastName.trim(), phone: phone.trim() })
+      .update({
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        phone: phone.trim(),
+      })
       .eq("id", profile!.id);
     setLoading(false);
     if (error) {
@@ -132,7 +137,7 @@ export default function Onboarding() {
 
   const toggleSport = (s: string) => {
     setSelectedSports((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
     );
   };
 
@@ -159,40 +164,92 @@ export default function Onboarding() {
 
         {step === 0 && (
           <>
-            <Text style={{ fontSize: 24, fontWeight: "800", color: "#1B2A4A", marginBottom: 4 }}>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "800",
+                color: "#1B2A4A",
+                marginBottom: 4,
+              }}
+            >
               Personal Details
             </Text>
             <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 24 }}>
               Tell us about yourself
             </Text>
 
-            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
               First Name *
             </Text>
             <TextInput
-              style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 14,
+                fontSize: 16,
+                marginBottom: 16,
+              }}
               value={firstName}
               onChangeText={setFirstName}
               placeholder="John"
               placeholderTextColor="#9CA3AF"
             />
 
-            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
               Last Name *
             </Text>
             <TextInput
-              style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 14,
+                fontSize: 16,
+                marginBottom: 16,
+              }}
               value={lastName}
               onChangeText={setLastName}
               placeholder="Smith"
               placeholderTextColor="#9CA3AF"
             />
 
-            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
               Phone (optional)
             </Text>
             <TextInput
-              style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 24 }}
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 14,
+                fontSize: 16,
+                marginBottom: 24,
+              }}
               value={phone}
               onChangeText={setPhone}
               placeholder="(555) 123-4567"
@@ -203,10 +260,22 @@ export default function Onboarding() {
             <TouchableOpacity
               onPress={handleSaveProfile}
               disabled={loading}
-              style={{ backgroundColor: "#1B2A4A", borderRadius: 8, padding: 16, alignItems: "center", opacity: loading ? 0.7 : 1 }}
+              style={{
+                backgroundColor: "#1B2A4A",
+                borderRadius: 8,
+                padding: 16,
+                alignItems: "center",
+                opacity: loading ? 0.7 : 1,
+              }}
             >
-              {loading ? <ActivityIndicator color="#FFFFFF" /> : (
-                <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>Continue</Text>
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text
+                  style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}
+                >
+                  Continue
+                </Text>
               )}
             </TouchableOpacity>
           </>
@@ -214,16 +283,40 @@ export default function Onboarding() {
 
         {step === 1 && (
           <>
-            <Text style={{ fontSize: 24, fontWeight: "800", color: "#1B2A4A", marginBottom: 4 }}>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "800",
+                color: "#1B2A4A",
+                marginBottom: 4,
+              }}
+            >
               Your School
             </Text>
             <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 24 }}>
               Enter your school's information
             </Text>
 
-            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>School Name *</Text>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
+              School Name *
+            </Text>
             <TextInput
-              style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 14,
+                fontSize: 16,
+                marginBottom: 16,
+              }}
               value={schoolName}
               onChangeText={setSchoolName}
               placeholder="Lincoln High School"
@@ -232,9 +325,26 @@ export default function Onboarding() {
 
             <View style={{ flexDirection: "row", gap: 12 }}>
               <View style={{ flex: 2 }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>City</Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
+                  City
+                </Text>
                 <TextInput
-                  style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    borderRadius: 8,
+                    padding: 14,
+                    fontSize: 16,
+                    marginBottom: 16,
+                  }}
                   value={schoolCity}
                   onChangeText={setSchoolCity}
                   placeholder="Dallas"
@@ -242,9 +352,26 @@ export default function Onboarding() {
                 />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>State</Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
+                  State
+                </Text>
                 <TextInput
-                  style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    borderRadius: 8,
+                    padding: 14,
+                    fontSize: 16,
+                    marginBottom: 16,
+                  }}
                   value={schoolState}
                   onChangeText={setSchoolState}
                   placeholder="TX"
@@ -255,18 +382,52 @@ export default function Onboarding() {
               </View>
             </View>
 
-            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Address</Text>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
+              Address
+            </Text>
             <TextInput
-              style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 14,
+                fontSize: 16,
+                marginBottom: 16,
+              }}
               value={schoolAddress}
               onChangeText={setSchoolAddress}
               placeholder="123 Main St"
               placeholderTextColor="#9CA3AF"
             />
 
-            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Zip Code</Text>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
+              Zip Code
+            </Text>
             <TextInput
-              style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 14,
+                fontSize: 16,
+                marginBottom: 16,
+              }}
               value={schoolZip}
               onChangeText={setSchoolZip}
               placeholder="75001"
@@ -274,9 +435,26 @@ export default function Onboarding() {
               keyboardType="number-pad"
             />
 
-            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Mascot</Text>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
+              Mascot
+            </Text>
             <TextInput
-              style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                padding: 14,
+                fontSize: 16,
+                marginBottom: 16,
+              }}
               value={schoolMascot}
               onChangeText={setSchoolMascot}
               placeholder="Lions"
@@ -285,9 +463,26 @@ export default function Onboarding() {
 
             <View style={{ flexDirection: "row", gap: 12 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Conference</Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
+                  Conference
+                </Text>
                 <TextInput
-                  style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    borderRadius: 8,
+                    padding: 14,
+                    fontSize: 16,
+                    marginBottom: 16,
+                  }}
                   value={schoolConference}
                   onChangeText={setSchoolConference}
                   placeholder="District 7"
@@ -295,9 +490,26 @@ export default function Onboarding() {
                 />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>Division</Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
+                  Division
+                </Text>
                 <TextInput
-                  style={{ backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 14, fontSize: 16, marginBottom: 16 }}
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    borderRadius: 8,
+                    padding: 14,
+                    fontSize: 16,
+                    marginBottom: 16,
+                  }}
                   value={schoolDivision}
                   onChangeText={setSchoolDivision}
                   placeholder="5A"
@@ -309,10 +521,22 @@ export default function Onboarding() {
             <TouchableOpacity
               onPress={handleSaveSchool}
               disabled={loading}
-              style={{ backgroundColor: "#1B2A4A", borderRadius: 8, padding: 16, alignItems: "center", opacity: loading ? 0.7 : 1 }}
+              style={{
+                backgroundColor: "#1B2A4A",
+                borderRadius: 8,
+                padding: 16,
+                alignItems: "center",
+                opacity: loading ? 0.7 : 1,
+              }}
             >
-              {loading ? <ActivityIndicator color="#FFFFFF" /> : (
-                <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>Continue</Text>
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text
+                  style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}
+                >
+                  Continue
+                </Text>
               )}
             </TouchableOpacity>
           </>
@@ -320,7 +544,14 @@ export default function Onboarding() {
 
         {step === 2 && (
           <>
-            <Text style={{ fontSize: 24, fontWeight: "800", color: "#1B2A4A", marginBottom: 4 }}>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "800",
+                color: "#1B2A4A",
+                marginBottom: 4,
+              }}
+            >
               Select Sports
             </Text>
             <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 24 }}>
@@ -335,15 +566,19 @@ export default function Onboarding() {
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: selectedSports.includes(s) ? "#1B2A4A" : "#FFFFFF",
+                    backgroundColor: selectedSports.includes(s)
+                      ? "#1B2A4A"
+                      : "#FFFFFF",
                     borderWidth: 1,
-                    borderColor: selectedSports.includes(s) ? "#1B2A4A" : "#D1D5DB",
+                    borderColor: selectedSports.includes(s)
+                      ? "#1B2A4A"
+                      : "#D1D5DB",
                     borderRadius: 12,
                     padding: 20,
                   }}
                 >
-                  <Text style={{ fontSize: 28, marginRight: 16 }}>
-                    {s === "football" ? "🏈" : "⚽"}
+                  <Text style={{ marginRight: 16 }}>
+                    <Circle size={28} />
                   </Text>
                   <Text
                     style={{
@@ -361,10 +596,22 @@ export default function Onboarding() {
             <TouchableOpacity
               onPress={handleFinish}
               disabled={loading}
-              style={{ backgroundColor: "#F97316", borderRadius: 8, padding: 16, alignItems: "center", opacity: loading ? 0.7 : 1 }}
+              style={{
+                backgroundColor: "#F97316",
+                borderRadius: 8,
+                padding: 16,
+                alignItems: "center",
+                opacity: loading ? 0.7 : 1,
+              }}
             >
-              {loading ? <ActivityIndicator color="#FFFFFF" /> : (
-                <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}>Get Started</Text>
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text
+                  style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "700" }}
+                >
+                  Get Started
+                </Text>
               )}
             </TouchableOpacity>
           </>

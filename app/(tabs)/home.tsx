@@ -82,9 +82,22 @@ export default function Home() {
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{ padding: 16 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1B2A4A" />}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#1B2A4A"
+        />
+      }
     >
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 24,
+        }}
+      >
         <View>
           <Text style={{ fontSize: 24, fontWeight: "800", color: "#1B2A4A" }}>
             Welcome, {profile?.first_name || "Coach"}
@@ -99,17 +112,39 @@ export default function Home() {
       </View>
 
       {/* Pending Requests */}
-      <View style={{ backgroundColor: "#FFFFFF", borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      <View
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 16,
+          shadowColor: "#000",
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 2,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 12,
+          }}
+        >
           <Text style={{ fontSize: 18, fontWeight: "700", color: "#1B2A4A" }}>
             Pending Requests
           </Text>
           <TouchableOpacity onPress={() => router.push("/(tabs)/requests")}>
-            <Text style={{ color: "#F97316", fontWeight: "600", fontSize: 14 }}>View All</Text>
+            <Text style={{ color: "#F97316", fontWeight: "600", fontSize: 14 }}>
+              View All
+            </Text>
           </TouchableOpacity>
         </View>
         {pendingRequests.length === 0 ? (
-          <Text style={{ color: "#9CA3AF", fontSize: 14 }}>No pending requests</Text>
+          <Text style={{ color: "#9CA3AF", fontSize: 14 }}>
+            No pending requests
+          </Text>
         ) : (
           pendingRequests.map((req) => (
             <View
@@ -120,8 +155,11 @@ export default function Home() {
                 paddingVertical: 10,
               }}
             >
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151" }}>
-                {req.sport.charAt(0).toUpperCase() + req.sport.slice(1)} — {req.date}
+              <Text
+                style={{ fontSize: 14, fontWeight: "600", color: "#374151" }}
+              >
+                {req.sport.charAt(0).toUpperCase() + req.sport.slice(1)} —{" "}
+                {req.date}
               </Text>
               <Text style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>
                 {req.time_start} – {req.time_end} • {req.home_away}
@@ -132,12 +170,32 @@ export default function Home() {
       </View>
 
       {/* Upcoming Games */}
-      <View style={{ backgroundColor: "#FFFFFF", borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 }}>
-        <Text style={{ fontSize: 18, fontWeight: "700", color: "#1B2A4A", marginBottom: 12 }}>
+      <View
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 16,
+          shadowColor: "#000",
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 2,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: "700",
+            color: "#1B2A4A",
+            marginBottom: 12,
+          }}
+        >
           Upcoming Games
         </Text>
         {upcomingGames.length === 0 ? (
-          <Text style={{ color: "#9CA3AF", fontSize: 14 }}>No upcoming games scheduled</Text>
+          <Text style={{ color: "#9CA3AF", fontSize: 14 }}>
+            No upcoming games scheduled
+          </Text>
         ) : (
           upcomingGames.map((game) => (
             <View
@@ -148,8 +206,11 @@ export default function Home() {
                 paddingVertical: 10,
               }}
             >
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151" }}>
-                {game.sport.charAt(0).toUpperCase() + game.sport.slice(1)} — {game.date}
+              <Text
+                style={{ fontSize: 14, fontWeight: "600", color: "#374151" }}
+              >
+                {game.sport.charAt(0).toUpperCase() + game.sport.slice(1)} —{" "}
+                {game.date}
               </Text>
               <Text style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>
                 {game.time_start} – {game.time_end} • {game.venue || "TBD"}
@@ -160,17 +221,39 @@ export default function Home() {
       </View>
 
       {/* Open Availability */}
-      <View style={{ backgroundColor: "#FFFFFF", borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      <View
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 16,
+          shadowColor: "#000",
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 2,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 12,
+          }}
+        >
           <Text style={{ fontSize: 18, fontWeight: "700", color: "#1B2A4A" }}>
             Your Open Slots
           </Text>
           <TouchableOpacity onPress={() => router.push("/(tabs)/availability")}>
-            <Text style={{ color: "#F97316", fontWeight: "600", fontSize: 14 }}>Manage</Text>
+            <Text style={{ color: "#F97316", fontWeight: "600", fontSize: 14 }}>
+              Manage
+            </Text>
           </TouchableOpacity>
         </View>
         {openSlots.length === 0 ? (
-          <Text style={{ color: "#9CA3AF", fontSize: 14 }}>No open availability slots</Text>
+          <Text style={{ color: "#9CA3AF", fontSize: 14 }}>
+            No open availability slots
+          </Text>
         ) : (
           openSlots.map((slot) => (
             <View
@@ -181,11 +264,15 @@ export default function Home() {
                 paddingVertical: 10,
               }}
             >
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151" }}>
-                {slot.sport.charAt(0).toUpperCase() + slot.sport.slice(1)} — {slot.date}
+              <Text
+                style={{ fontSize: 14, fontWeight: "600", color: "#374151" }}
+              >
+                {slot.sport.charAt(0).toUpperCase() + slot.sport.slice(1)} —{" "}
+                {slot.date}
               </Text>
               <Text style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>
-                {slot.time_start} – {slot.time_end} • {slot.home_away_preference} • {slot.venue || "Flexible"}
+                {slot.time_start} – {slot.time_end} •{" "}
+                {slot.home_away_preference} • {slot.venue || "Flexible"}
               </Text>
             </View>
           ))

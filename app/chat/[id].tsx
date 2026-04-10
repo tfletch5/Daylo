@@ -16,6 +16,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { useAuthStore } from "../../src/store/auth";
 import { supabase } from "../../src/lib/supabase";
 import { Tables } from "../../src/types/database";
+import { Paperclip, Image as ImageIcon } from "lucide-react-native";
 
 type Message = Tables<"messages">;
 
@@ -63,14 +64,20 @@ export default function ChatScreen() {
       .single();
 
     if (convo) {
-      const otherId = convo.participant_a === profile.id ? convo.participant_b : convo.participant_a;
+      const otherId =
+        convo.participant_a === profile.id
+          ? convo.participant_b
+          : convo.participant_a;
       const { data: other } = await supabase
         .from("profiles")
         .select("first_name, last_name")
         .eq("id", otherId)
         .single();
       if (other) {
-        setOtherName(`${other.first_name || ""} ${other.last_name || ""}`.trim() || "Coach");
+        setOtherName(
+          `${other.first_name || ""} ${other.last_name || ""}`.trim() ||
+            "Coach",
+        );
       }
     }
   }, [conversationId, profile]);
@@ -104,7 +111,7 @@ export default function ChatScreen() {
               .update({ is_read: true })
               .eq("id", newMsg.id);
           }
-        }
+        },
       )
       .subscribe();
 
@@ -143,7 +150,11 @@ export default function ChatScreen() {
       return;
     }
 
-    await uploadAndSendFile(asset.uri, asset.fileName || "image.jpg", "image/jpeg");
+    await uploadAndSendFile(
+      asset.uri,
+      asset.fileName || "image.jpg",
+      "image/jpeg",
+    );
   };
 
   const handleAttachDocument = async () => {
@@ -163,7 +174,11 @@ export default function ChatScreen() {
     await uploadAndSendFile(asset.uri, asset.name, "application/pdf");
   };
 
-  const uploadAndSendFile = async (uri: string, fileName: string, mimeType: string) => {
+  const uploadAndSendFile = async (
+    uri: string,
+    fileName: string,
+    mimeType: string,
+  ) => {
     if (!profile || !conversationId) return;
     setSending(true);
 
@@ -188,7 +203,7 @@ export default function ChatScreen() {
     const { error: msgErr } = await supabase.from("messages").insert({
       conversation_id: conversationId,
       sender_id: profile.id,
-      content: `📎 ${fileName}`,
+      content: `Attached: ${fileName}`,
       file_url: urlData.publicUrl,
       file_type: mimeType,
       file_name: fileName,
@@ -225,10 +240,14 @@ export default function ChatScreen() {
           data={messages}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ padding: 16, paddingBottom: 8 }}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          onContentSizeChange={() =>
+            flatListRef.current?.scrollToEnd({ animated: false })
+          }
           ListEmptyComponent={
             <View style={{ alignItems: "center", marginTop: 48 }}>
-              <Text style={{ color: "#9CA3AF" }}>No messages yet. Start the conversation!</Text>
+              <Text style={{ color: "#9CA3AF" }}>
+                No messages yet. Start the conversation!
+              </Text>
             </View>
           }
           renderItem={({ item }) => {
@@ -307,16 +326,21 @@ export default function ChatScreen() {
           }}
         >
           <TouchableOpacity onPress={handleAttachImage} style={{ padding: 8 }}>
-            <Text style={{ fontSize: 20 }}>🖼️</Text>
+            <Text style={{ color: "#6B7280" }}>
+              <ImageIcon size={20} />
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleAttachDocument} style={{ padding: 8 }}>
-            <Text style={{ fontSize: 20 }}>📄</Text>
+          <TouchableOpacity
+            onPress={handleAttachDocument}
+            style={{ padding: 8 }}
+          >
+            <Text style={{ color: "#6B7280" }}>
+              <Paperclip size={20} />
+            </Text>
           </TouchableOpacity>
           <TextInput
             style={{
               flex: 1,
-              backgroundColor: "#F3F4F6",
-              borderRadius: 20,
               paddingHorizontal: 16,
               paddingVertical: 10,
               fontSize: 15,
@@ -343,7 +367,11 @@ export default function ChatScreen() {
             {sending ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 16 }}>↑</Text>
+              <Text
+                style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 16 }}
+              >
+                ^
+              </Text>
             )}
           </TouchableOpacity>
         </View>

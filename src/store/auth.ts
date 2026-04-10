@@ -14,13 +14,16 @@ interface AuthState {
   setSession: (session: Session | null) => void;
   setProfile: (profile: Profile | null) => void;
   fetchProfile: () => Promise<void>;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ error: string | null }>;
   signUp: (
     email: string,
     password: string,
     firstName: string,
-    lastName: string
-  ) => Promise<{ error: string | null }>;
+    lastName: string,
+  ) => Promise<{ error: string | null; needsVerification?: boolean }>;
   signOut: () => Promise<void>;
   initialize: () => Promise<void>;
 }
@@ -77,6 +80,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       },
     });
     if (error) return { error: error.message };
+    // Return success to indicate verification email was sent
+    return { error: null, needsVerification: true };
+  },
+
+  verifyEmail: async (email: string, code: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: code,
+      type: "signup",
+    });
+    if (error) return { error: error.message };
+
+    // After verification, fetch the profile
+    await get().fetchProfile();
     return { error: null };
   },
 

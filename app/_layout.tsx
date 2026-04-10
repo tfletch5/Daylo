@@ -54,6 +54,22 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            headerStyle: { backgroundColor: "#1B2A4A" },
+            headerTintColor: "#FFFFFF",
+          }}
+        />
+        <Stack.Screen
+          name="manage-school"
+          options={{
+            title: "Manage Schools",
+            headerStyle: { backgroundColor: "#1B2A4A" },
+            headerTintColor: "#FFFFFF",
+          }}
+        />
+        <Stack.Screen
           name="pending"
           options={{ title: "Account Pending", headerBackVisible: false }}
         />

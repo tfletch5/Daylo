@@ -29,7 +29,19 @@ export default function SignIn() {
     const { error: err } = await signIn(email.trim(), password);
     setLoading(false);
     if (err) {
-      setError(err);
+      // Check if error is about unverified email
+      if (err.includes("Email not confirmed") || err.includes("verify")) {
+        setError("Please verify your email first.");
+        // Redirect to verification screen after a short delay
+        setTimeout(() => {
+          router.push({
+            pathname: "/(auth)/verify-email",
+            params: { email: email.trim() },
+          });
+        }, 1500);
+      } else {
+        setError(err);
+      }
     } else {
       router.replace("/");
     }
@@ -41,7 +53,11 @@ export default function SignIn() {
       style={{ flex: 1 }}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          padding: 24,
+        }}
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ alignItems: "center", marginBottom: 48 }}>
@@ -62,11 +78,20 @@ export default function SignIn() {
               marginBottom: 16,
             }}
           >
-            <Text style={{ color: "#EF4444", textAlign: "center" }}>{error}</Text>
+            <Text style={{ color: "#EF4444", textAlign: "center" }}>
+              {error}
+            </Text>
           </View>
         )}
 
-        <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            color: "#374151",
+            marginBottom: 6,
+          }}
+        >
           Email
         </Text>
         <TextInput
@@ -88,7 +113,14 @@ export default function SignIn() {
           autoComplete="email"
         />
 
-        <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 6 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            color: "#374151",
+            marginBottom: 6,
+          }}
+        >
           Password
         </Text>
         <TextInput
@@ -129,11 +161,36 @@ export default function SignIn() {
           )}
         </TouchableOpacity>
 
-        <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 24 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 24,
+          }}
+        >
           <Text style={{ color: "#6B7280" }}>Don't have an account? </Text>
           <Link href="/(auth)/sign-up" asChild>
             <TouchableOpacity>
-              <Text style={{ color: "#F97316", fontWeight: "600" }}>Sign Up</Text>
+              <Text style={{ color: "#F97316", fontWeight: "600" }}>
+                Sign Up
+              </Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 12,
+          }}
+        >
+          <Text style={{ color: "#6B7280" }}>Need to verify your email? </Text>
+          <Link href="/(auth)/verify-email" asChild>
+            <TouchableOpacity>
+              <Text style={{ color: "#F97316", fontWeight: "600" }}>
+                Verify Email
+              </Text>
             </TouchableOpacity>
           </Link>
         </View>
